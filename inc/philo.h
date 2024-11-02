@@ -6,53 +6,74 @@
 /*   By: ofilloux <ofilloux@student.42barcelona.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 16:17:57 by ofilloux          #+#    #+#             */
-/*   Updated: 2024/09/18 18:55:01 by ofilloux         ###   ########.fr       */
+/*   Updated: 2024/10/30 18:46:11 by ofilloux         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_H
 # define PHILO_H
 
-# include <unistd.h>
-# include <stdlib.h>
+# include <unistd.h> // usleep
+# include <stdlib.h> // malloc
 # include <stdio.h> // printf
 # include <pthread.h>
 # include <stdbool.h>
 # include <limits.h>
-# include <sys/time.h>
+# include <sys/time.h> //gettimeofday
+# include <sys/types.h>  // useconds_t
+# include <stdint.h> // uint64_t
+# include <errno.h>
 
-typedef struct lst_filo
+typedef struct s_params	t_params;
+
+// array de filos
+typedef struct filo
 {
-	unsigned int	id;
-	unsigned int	ttd;
-	unsigned int	tte;
-	unsigned int	sleep_time;
-	int				lunchs;
-	bool			is_eating;
-	bool			is_sleeping;
-	bool			is_dead;
+	t_params		*params;
 	pthread_t		thread;
-	struct s_params	*params;
-	struct lst_filo	*next;
-	struct lst_filo	*prev;
-}	t_filo;
+	int				id;
+	long			ttd; // pas sur si util, mais je crois que ca l'est
+	int				lunchs;
+	pthread_mutex_t	fil_mtx;
+	bool			is_dead;
+	//pthread_mutex_t	*fork; // a suppr
+	pthread_mutex_t	*left_fork;
+	pthread_mutex_t	*right_fork;
+}	t_filo_arr;
 
 typedef struct s_params
 {
 	int				phil_n;
 	long			ttd_max;
-	long			tte_max;
+	long			time_to_eat;
 	long			tts_max;
 	int				tot_lunchs;
-	double			start_time;
-	bool			dinner_started; //unused
-	bool			dinner_finished; //unused
-	t_filo			*filos_lst;
+	long			start_time;
+	pthread_mutex_t	*forks2;
+	bool			*forks_initialized;
+	pthread_mutex_t	start_time_mutex;
+	bool			one_died;
+	bool			all_have_ate;
+	bool			dinner_is_over;
+	t_filo_arr		*filo_arr; /// a faire
 }	t_params;
-
 
 //////// SRC ////////////
 void	init_params(char **av, t_params *params);
+void	init_filos_arr(t_params *params);
+void	init_forks_params_mutexes(t_params *params);
+
+// algo.c
+void	lets_eat(t_params *params);
+
+/// dinner_is_over.c
+bool	is_diner_over(t_params *params);
+void	is_diner_over2(t_params *params);
+
+/// actions.c
+void	eat(t_filo_arr *filo, t_params *params);
+void	think(t_filo_arr *filo, t_params *params);
+void	sleeping(t_filo_arr *filo, t_params *params);
 
 //////// UTILS ////////
 ///string.c
@@ -60,14 +81,25 @@ size_t	ft_strlen(const char *s);
 int		ft_strncmp(const char *s1, const char *s2, size_t n);
 long	ft_atol(char *s);
 
+//mutex.c
+void	ft_mutex_init(pthread_mutex_t *mutex, const pthread_mutexattr_t *attr, \
+			t_params *params);
+void	ft_mutex_destroy(pthread_mutex_t *mutex, t_params *params);
+void	ft_mutex_lock(pthread_mutex_t *mutex, t_params *params);
+void	ft_mutex_unlock(pthread_mutex_t *mutex, t_params *params);
+
 ///time.c
 int		msleep(unsigned int msec);
 void	set_simulation_start_time(t_params *params);
-int		timestamp_msg(int phil_id, char *action);
+long	get_m_time(t_params *params);
+
+/// msg.c
+int		timestamp_msg(t_filo_arr *filo, char *action);
+bool	dead_before_print(t_params *params);
 
 /////// CLEAN EXIT ///////
 void	simple_exit(char *msg, int exit_num);
-void	free_lst_exit(t_filo *filos_lst, int exit_num);
+void	clean_exit(t_params *params, int exit_num, char *msg);
 
 #endif
 

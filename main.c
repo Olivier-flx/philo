@@ -6,7 +6,7 @@
 /*   By: ofilloux <ofilloux@student.42barcelona.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 16:16:33 by ofilloux          #+#    #+#             */
-/*   Updated: 2024/09/16 16:39:30 by ofilloux         ###   ########.fr       */
+/*   Updated: 2024/10/30 17:23:30 by ofilloux         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,15 @@ Las reglas específicas para la parte obligatoria son:
  option - number_of_times_each_philosopher_must_eat : lunchs
 */
 
+///////
+// blocage avec ./philo 4 10000 200 200
+// les log bloquent à 604 avant de mettre directement ensuite : 10001 1 died
+
+// idem lorsue le total lunch est renseigné
+//
+
+// problème avec ./philo 4 410 200 200 ou aucun filosophe ne devrait mourir
+
 #include "./inc/philo.h"
 
 int	main(int ac, char **av)
@@ -77,21 +86,9 @@ int	main(int ac, char **av)
 	if (ac != 5 && ac != 6)
 		simple_exit("Wrong number of arguments", EXIT_FAILURE);
 	init_params(av, &params);
+	init_forks_params_mutexes(&params);
+	init_filos_arr(&params);
 	lets_eat(&params);
-
-	////////////////////
-	t_filo *tmp;
-	int		i = 0;
-	tmp = params.filos_lst;
-	while (params.filos_lst && i < params.phil_n)
-	{
-		printf("ID = %i\n", params.filos_lst->id);
-		params.filos_lst = params.filos_lst->next;
-		i++;
-	}
-	printf("ttd_max = %li\n", params.ttd_max);
-	printf("tts_max = %li\n", params.tts_max);
-	printf("tot_lunchs = %i\n", params.tot_lunchs);
-	free_lst_exit(tmp, EXIT_SUCCESS);
+	clean_exit (&params, EXIT_SUCCESS, NULL);
 	return (0);
 }

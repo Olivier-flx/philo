@@ -6,7 +6,7 @@
 /*   By: ofilloux <ofilloux@student.42barcelona.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/13 15:43:58 by ofilloux          #+#    #+#             */
-/*   Updated: 2024/09/18 17:32:10 by ofilloux         ###   ########.fr       */
+/*   Updated: 2024/10/16 16:38:21 by ofilloux         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ bool	contains_letter(char *s)
 	int	i;
 
 	i = 0;
-	while (s[i])
+	while (s && s[i] != '\0')
 	{
 		if ((s[i] >= 21 && s[i] <= 42) || s[i] == 44 || s[i] == 46 \
 			|| s[i] == 47 || s[i] >= 58)
@@ -71,8 +71,8 @@ long	ft_atol(char *s)
 	int		negative;
 	long	number;
 
-	if (contains_letter(s))
-		return (-404);
+	if (!s || contains_letter(s))
+		return (-1);
 	i = 0;
 	negative = 1;
 	number = 0;
@@ -88,7 +88,7 @@ long	ft_atol(char *s)
 	{
 		number = number * 10 + (s[i] - '0');
 		if (number > INT_MAX)
-			return (-404);
+			return (-1);
 		i++;
 	}
 	return (number * negative);
